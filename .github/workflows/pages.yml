@@ -28,11 +28,8 @@ jobs:
       - run: npx next build
         env:
           NEXT_TELEMETRY_DISABLED: 1
-      - name: Adjust public asset paths
-        run: |
-          find out -type f \( -name '*.html' -o -name '*.css' -o -name '*.js' -o -name '*.json' \) -print0 \
-            | xargs -0 sed -i 's|/assets/|/nonna-v2/assets/|g'
-          touch out/.nojekyll
+      - name: Prepare static export
+        run: touch out/.nojekyll
       - uses: actions/configure-pages@v5
         with:
           enablement: true
@@ -50,5 +47,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-# Re-run after enabling GitHub Pages with GitHub Actions.
