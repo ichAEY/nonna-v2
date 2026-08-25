@@ -47,3 +47,20 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Diagnose nonna2 public page
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -u
+          echo "--- HEADERS ---"
+          curl -sSIL --max-time 20 https://nonna2.tanem.ru/ || true
+          echo "--- HTML HEAD ---"
+          curl -sSL --max-time 20 https://nonna2.tanem.ru/ | head -c 5000 || true
+          echo
+          echo "--- ASSET STATUS ---"
+          HTML=$(curl -sSL --max-time 20 https://nonna2.tanem.ru/ || true)
+          printf '%s' "$HTML" | grep -oE '(src|href)="/[^"]+"' | sed -E 's/^(src|href)="([^"]+)"/\2/' | grep -E '^/(_next|assets)/' | head -n 12 | while read -r path; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "https://nonna2.tanem.ru${path}" || true)
+            echo "$code $path"
+          done
